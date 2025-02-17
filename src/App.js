@@ -16,6 +16,10 @@ import { AddIcon, SmallAddIcon, DownloadIcon, DeleteIcon } from '@chakra-ui/icon
 import { AiOutlineDownload, AiOutlineEye, AiOutlineDelete, AiOutlineEdit, AiOutlinePlus, AiOutlineFolderOpen } from 'react-icons/ai';
 import { IoIosCreate } from 'react-icons/io';
 import sanitize from 'sanitize-filename';
+import L from "leaflet";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 
 function App() {
   const DEFAULT_LICENSE = "Creative Commons CC-BY-SA [ https://creativecommons.org/licenses/by-sa/3.0/ ]";
@@ -24,9 +28,9 @@ function App() {
   const coordinatePattern = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
   L.Icon.Default.mergeOptions({
-    iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-    iconUrl: require('leaflet/dist/images/marker-icon.png'),
-    shadowUrl: require('leaflet/dist/images/marker-shadow.png')
+    iconRetinaUrl: markerRetina,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow
   });
 
   const [polygons, setPolygons] = React.useState([]);
