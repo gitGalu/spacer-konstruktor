@@ -17,9 +17,6 @@ import { AiOutlineDownload, AiOutlineEye, AiOutlineDelete, AiOutlineEdit, AiOutl
 import { IoIosCreate } from 'react-icons/io';
 import sanitize from 'sanitize-filename';
 import L from "leaflet";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 
 function App() {
   const DEFAULT_LICENSE = "Creative Commons CC-BY-SA [ https://creativecommons.org/licenses/by-sa/3.0/ ]";
@@ -27,10 +24,12 @@ function App() {
   const longitudeRegex = /^-?((1[0-7][0-9]|[1-9]?[0-9])(\.\d+)?|180(\.0+)?)$/;
   const coordinatePattern = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
+  delete L.Icon.Default.prototype._getIconUrl;
+  
   L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerRetina,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png'
   });
 
   const [polygons, setPolygons] = React.useState([]);
