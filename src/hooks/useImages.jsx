@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import exifr from 'exifr';
 import Resizer from "react-image-file-resizer";
 import { useToast } from '@chakra-ui/react';
+import { useTranslation } from 'react-i18next';
 
 const resizeFile = (file) =>
   new Promise((resolve) => {
@@ -22,27 +23,39 @@ export const useImages = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const counterRef = useRef(0);
   const toast = useToast();
+  const { t } = useTranslation();
 
   const importImage = async (file) => {
     try {
-      const exif = await exifr.parse(file);
-      if (!exif) {
-        throw new Error('Cannot parse EXIF data!');
+      console.log('Starting image import for:', file.name);
+      
+      let exif = null;
+      try {
+        exif = await exifr.parse(file);
+        console.log('EXIF parsed successfully:', exif);
+      } catch (exifErr) {
+        console.warn('EXIF parsing failed:', exifErr);
       }
 
+      console.log('Starting image resize...');
       const image = await resizeFile(file);
+      console.log('Image resized successfully');
+      
       setImages(prev => [...prev, {
         key: counterRef.current++,
         data: image,
-        lat: exif.latitude || null,
-        lon: exif.longitude || null,
-        direction: exif.GPSImgDirection || null,
-        directionRef: exif.GPSImgDirectionRef || null
+        lat: exif?.latitude || null,
+        lon: exif?.longitude || null,
+        direction: exif?.GPSImgDirection || null,
+        directionRef: exif?.GPSImgDirectionRef || null
       }]);
+      
+      console.log('Image added to state successfully');
     } catch (err) {
+      console.error('Image import failed:', err);
       toast({
         title: t('fileLoadError'),
-        description: file.name,
+        description: `${file.name}: ${err.message}`,
         status: 'error',
         duration: 4000,
         isClosable: true,
