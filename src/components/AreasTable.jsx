@@ -26,7 +26,9 @@ export const AreasTable = ({
   deleteArea,
   doAreasOverlap,
   unassignedCount,
-  images
+  images,
+  focusedAreaId,
+  setFocusedAreaId
 }) => {
   const { t } = useTranslation();
 
@@ -60,6 +62,8 @@ export const AreasTable = ({
                   <Input
                     value={areaNames[area.id] || ''}
                     onChange={(e) => setAreaName(area.id, e.target.value)}
+                    onFocus={() => setFocusedAreaId(area.id)}
+                    onBlur={() => setFocusedAreaId(null)}
                     size="sm"
                   />
                 </Td>

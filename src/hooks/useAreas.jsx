@@ -4,6 +4,7 @@ import * as turf from '@turf/turf';
 export const useAreas = () => {
   const [areas, setAreas] = useState([]);
   const [areaNames, setAreaNames] = useState({});
+  const [focusedAreaId, setFocusedAreaId] = useState(null);
   const idCounter = useRef(0);
   const mapRef = useRef(null);
 
@@ -98,6 +99,8 @@ export const useAreas = () => {
     doAreasOverlap,
     onCreated,
     onEdited,
-    mapRef
+    mapRef,
+    focusedAreaId,
+    setFocusedAreaId
   };
 };

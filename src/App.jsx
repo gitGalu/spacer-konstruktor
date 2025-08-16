@@ -45,7 +45,9 @@ export function App() {
     doAreasOverlap,
     mapRef,
     onCreated,
-    onEdited
+    onEdited,
+    focusedAreaId,
+    setFocusedAreaId
   } = useAreas();
 
   const {
@@ -351,6 +353,8 @@ export function App() {
                     doAreasOverlap={doAreasOverlap}
                     unassignedCount={getUnassignedImagesCount(images)}
                     images={images}
+                    focusedAreaId={focusedAreaId}
+                    setFocusedAreaId={setFocusedAreaId}
                   />
                   <MapComponent
                     images={images}
@@ -360,6 +364,7 @@ export function App() {
                     onCreated={onCreated}
                     onEdited={onEdited}
                     areas={areas}
+                    focusedAreaId={focusedAreaId}
                   />
                 </Flex>
               </TabPanel>

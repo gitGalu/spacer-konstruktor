@@ -115,14 +115,34 @@ export const MapComponent = ({
   onCreated,
   onEdited,
   areas = [],
+  focusedAreaId,
 }) => {
+  useEffect(() => {
+    if (!areas.length) return;
+    
+    areas.forEach(area => {
+      if (!area.layer) return;
+      
+      if (area.id === focusedAreaId) {
+        area.layer.setStyle({
+          color: '#f56500',
+          fillColor: '#f56500',
+          fillOpacity: 0.3,
+          weight: 4,
+          opacity: 1
+        });
+      } else {
+        area.layer.setStyle(POLYGON_STYLES);
+      }
+    });
+  }, [focusedAreaId, areas]);
+
   const getImageStatus = useMemo(() => {
     return (image) => {
       if (!image.lat || !image.lon) {
         return 'no-location';
       }
       
-      // Check for duplicates based on location data
       const duplicates = images.filter(img => 
         img.key !== image.key && 
         img.lat === image.lat && 
@@ -131,6 +151,20 @@ export const MapComponent = ({
       
       if (duplicates.length > 0) {
         return 'duplicate-location';
+      }
+      
+      if (focusedAreaId) {
+        const focusedArea = areas.find(area => area.id === focusedAreaId);
+        if (focusedArea && focusedArea.layer) {
+          try {
+            const coords = focusedArea.layer.toGeoJSON().geometry;
+            const point = turf.point([image.lon, image.lat]);
+            if (turf.booleanPointInPolygon(point, coords)) {
+              return 'focused-area';
+            }
+          } catch (e) {
+          }
+        }
       }
       
       const hasArea = areas.some(area => {
@@ -146,7 +180,7 @@ export const MapComponent = ({
       
       return hasArea ? 'assigned' : 'unassigned';
     };
-  }, [areas, images]);
+  }, [areas, images, focusedAreaId]);
 
   const getMarkerIcon = (status) => {
     switch (status) {
@@ -155,6 +189,8 @@ export const MapComponent = ({
       case 'unassigned':
         return createCustomIcon('#e53e3e');
       case 'duplicate-location':
+        return createCustomIcon('#f56500');
+      case 'focused-area':
         return createCustomIcon('#f56500');
       case 'assigned':
         return createCustomIcon('#38a169');
