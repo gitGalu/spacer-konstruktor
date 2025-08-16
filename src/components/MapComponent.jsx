@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Card, CardBody, CardFooter, Image, Stack, IconButton, Box } from '@chakra-ui/react';
 import { AiOutlineEye, AiOutlineDelete } from 'react-icons/ai';
 import * as L from 'leaflet';
+import * as turf from '@turf/turf';
 import '@geoman-io/leaflet-geoman-free';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
@@ -13,6 +14,23 @@ const POLYGON_STYLES = {
   fillOpacity: 0.2,
   weight: 3,
   opacity: 0.8
+};
+
+const createCustomIcon = (color = '#3182ce') => {
+  return L.divIcon({
+    html: `<div style="
+      background-color: ${color};
+      width: 25px;
+      height: 25px;
+      border-radius: 50% 50% 50% 0;
+      border: 2px solid white;
+      transform: rotate(-45deg);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    "></div>`,
+    className: '',
+    iconSize: [25, 25],
+    iconAnchor: [12, 25]
+  });
 };
 
 const MapInitializer = () => {
@@ -96,7 +114,42 @@ export const MapComponent = ({
   mapRef,
   onCreated,
   onEdited,
+  areas = [],
 }) => {
+  const getImageStatus = useMemo(() => {
+    return (image) => {
+      if (!image.lat || !image.lon) {
+        return 'no-location';
+      }
+      
+      const hasArea = areas.some(area => {
+        if (!area.layer) return false;
+        try {
+          const coords = area.layer.toGeoJSON().geometry;
+          const point = turf.point([image.lon, image.lat]);
+          return turf.booleanPointInPolygon(point, coords);
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      return hasArea ? 'assigned' : 'unassigned';
+    };
+  }, [areas]);
+
+  const getMarkerIcon = (status) => {
+    switch (status) {
+      case 'no-location':
+        return createCustomIcon('#e53e3e');
+      case 'unassigned':
+        return createCustomIcon('#e53e3e');
+      case 'assigned':
+        return createCustomIcon('#38a169');
+      default:
+        return createCustomIcon('#3182ce');
+    }
+  };
+
   return (
     <Box flex="1" height="600px" position="relative" className="map-container">
       <MapContainer
@@ -120,33 +173,40 @@ export const MapComponent = ({
         
         {images
           .filter((image) => image.lat != null && image.lon != null)
-          .map((image) => (
-            <Marker key={image.key} position={[image.lat, image.lon]}>
-              <Popup>
-                <Card padding="0px">
-                  <CardBody>
-                    <Image src={image.data} borderRadius='base' />
-                  </CardBody>
-                  <CardFooter paddingTop="0px" justify='right'>
-                    <Stack direction='row' spacing={4} align='center'>
-                      <IconButton
-                        variant='outline'
-                        fontSize='16px'
-                        icon={<AiOutlineEye />}
-                        onClick={() => onEditImage(image)}
-                      />
-                      <IconButton
-                        variant='outline'
-                        fontSize='16px'
-                        icon={<AiOutlineDelete />}
-                        onClick={() => onDeleteImage(image)}
-                      />
-                    </Stack>
-                  </CardFooter>
-                </Card>
-              </Popup>
-            </Marker>
-          ))}
+          .map((image) => {
+            const status = getImageStatus(image);
+            return (
+              <Marker 
+                key={image.key} 
+                position={[image.lat, image.lon]}
+                icon={getMarkerIcon(status)}
+              >
+                <Popup>
+                  <Card padding="0px">
+                    <CardBody>
+                      <Image src={image.data} borderRadius='base' />
+                    </CardBody>
+                    <CardFooter paddingTop="0px" justify='right'>
+                      <Stack direction='row' spacing={4} align='center'>
+                        <IconButton
+                          variant='outline'
+                          fontSize='16px'
+                          icon={<AiOutlineEye />}
+                          onClick={() => onEditImage(image)}
+                        />
+                        <IconButton
+                          variant='outline'
+                          fontSize='16px'
+                          icon={<AiOutlineDelete />}
+                          onClick={() => onDeleteImage(image)}
+                        />
+                      </Stack>
+                    </CardFooter>
+                  </Card>
+                </Popup>
+              </Marker>
+            );
+          })}
       </MapContainer>
     </Box>
   );

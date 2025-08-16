@@ -359,6 +359,7 @@ export function App() {
                     mapRef={mapRef}
                     onCreated={onCreated}
                     onEdited={onEdited}
+                    areas={areas}
                   />
                 </Flex>
               </TabPanel>
