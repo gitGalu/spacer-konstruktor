@@ -122,6 +122,17 @@ export const MapComponent = ({
         return 'no-location';
       }
       
+      // Check for duplicates based on location data
+      const duplicates = images.filter(img => 
+        img.key !== image.key && 
+        img.lat === image.lat && 
+        img.lon === image.lon
+      );
+      
+      if (duplicates.length > 0) {
+        return 'duplicate-location';
+      }
+      
       const hasArea = areas.some(area => {
         if (!area.layer) return false;
         try {
@@ -135,7 +146,7 @@ export const MapComponent = ({
       
       return hasArea ? 'assigned' : 'unassigned';
     };
-  }, [areas]);
+  }, [areas, images]);
 
   const getMarkerIcon = (status) => {
     switch (status) {
@@ -143,6 +154,8 @@ export const MapComponent = ({
         return createCustomIcon('#e53e3e');
       case 'unassigned':
         return createCustomIcon('#e53e3e');
+      case 'duplicate-location':
+        return createCustomIcon('#f56500');
       case 'assigned':
         return createCustomIcon('#38a169');
       default:
